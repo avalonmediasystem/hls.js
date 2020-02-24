@@ -71,7 +71,21 @@ class TSDemuxer {
     while (i < scanwindow) {
       // a TS fragment should contain at least 3 TS packets, a PAT, a PMT, and one PID, each starting with 0x47
       if (data[i] === 0x47 && data[i + 188] === 0x47 && data[i + 2 * 188] === 0x47) {
-        return i;
+        let j = i + 3 * 188;
+        let allTSPackets = true;
+        const checkwindow = Math.min(10000, data.length);
+        while (j < checkwindow) {
+          if (data[j] !== 0x47) {
+            allTSPackets = false;
+            break;
+          }
+          j = j + 188;
+        }
+        if (allTSPackets) {
+          return i;
+        } else {
+          i++;
+        }
       } else {
         i++;
       }
